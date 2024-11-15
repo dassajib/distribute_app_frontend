@@ -18,7 +18,7 @@ export function SignIn() {
 
   return (
     <section className="m-8 flex gap-4">
-      <div className="w-full lg:w-3/5 mt-24">
+      <div className="w-full lg:w-3/5 mt-24 flex flex-col justify-center items-center">
         <div className="text-center">
           <Typography variant="h2" className="font-bold mb-4">Sign In</Typography>
           <Typography variant="paragraph" color="blue-gray" className="text-lg font-normal">Enter your phone and password to Sign In.</Typography>
@@ -82,15 +82,14 @@ export function SignIn() {
             <Link to="/auth/sign-up" className="text-gray-900 ml-1">Create account</Link>
           </Typography>
         </Form>
-
       </div>
-      <div className="w-2/5 h-full hidden lg:block">
+      <div className="w-2/5 h-screen overflow-hidden hidden lg:block">
         <img
           src="/img/pattern.png"
-          className="h-full w-full object-cover rounded-3xl"
+          alt="Pattern"
+          className="h-screen w-full object-cover rounded-3xl"
         />
-      </div>
-
+    </div>
     </section>
   );
 }

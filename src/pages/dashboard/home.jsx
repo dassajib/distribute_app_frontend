@@ -1,33 +1,51 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import {
   Typography,
-  Card,
-  CardHeader,
   CardBody,
-  IconButton,
-  Menu,
-  MenuHandler,
-  MenuList,
-  MenuItem,
   Avatar,
-  Tooltip,
-  Progress,
+  Chip,
 } from "@material-tailwind/react";
-import {
-  EllipsisVerticalIcon,
-  ArrowUpIcon,
-} from "@heroicons/react/24/outline";
 import { StatisticsCard } from "@/widgets/cards";
 import { StatisticsChart } from "@/widgets/charts";
 import {
   statisticsCardsData,
   statisticsChartsData,
-  projectsTableData,
-  ordersOverviewData,
+  authorsTableData,
 } from "@/data";
-import { CheckCircleIcon, ClockIcon } from "@heroicons/react/24/solid";
+import { ClockIcon } from "@heroicons/react/24/solid";
+
+import CategoryModal from "@/components/CategoryModal/CategoryModal";
+import axios from "axios";
+import { CATEGORY_LIST_URL } from "@/configs";
 
 export function Home() {
+  const [categories, setCategories] = useState([]);
+  const [categoryModal, setcategoryModal] = useState(false);
+
+  const closeModal = () => setcategoryModal(false)
+
+  useEffect(() => {
+    const fetchCategories = async () => {
+      const accessToken = localStorage.getItem("access");
+      if (!accessToken) {
+        console.error("No access token found. Please log in.");
+        return;
+      }
+      try {
+        const response = await axios.get(CATEGORY_LIST_URL, {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+        });
+        console.log(response.data);
+      } catch (error) {
+        console.error("Error fetching categories:", error.response?.data || error.message);
+      }
+    };
+
+    fetchCategories();
+  }, []);
+
   return (
     <div className="mt-12">
       <div className="mb-12 grid gap-y-10 gap-x-6 md:grid-cols-2 xl:grid-cols-4">
@@ -48,6 +66,7 @@ export function Home() {
           />
         ))}
       </div>
+      
       <div className="mb-6 grid grid-cols-1 gap-y-12 gap-x-6 md:grid-cols-2 xl:grid-cols-3">
         {statisticsChartsData.map((props) => (
           <StatisticsChart
@@ -64,8 +83,9 @@ export function Home() {
             }
           />
         ))}
-      </div>
-      <div className="mb-4 grid grid-cols-1 gap-6 xl:grid-cols-3">
+      </div>  
+
+      {/* <div className="mb-4 grid grid-cols-1 gap-6 xl:grid-cols-3">
         <Card className="overflow-hidden xl:col-span-2 border border-blue-gray-100 shadow-sm">
           <CardHeader
             floated={false}
@@ -250,7 +270,127 @@ export function Home() {
             )}
           </CardBody>
         </Card>
+      </div> */}
+
+      <div className="mb-4 flex items-center justify-between">
+         {/* Search Field */}
+         <div className="relative">
+          <input
+            type="text"
+            placeholder="Search Category..."
+            className="pl-10 pr-4 py-2 border border-blue-gray-200 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+          />
+          <svg
+            className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-blue-gray-400"
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth="2"
+              d="M21 21l-4.35-4.35m1.1-6.15a7.5 7.5 0 11-15 0 7.5 7.5 0 0115 0z"
+            />
+          </svg>
+        </div>
+
+        {/* Create Category Button */}
+        <button onClick={() => setcategoryModal(!categoryModal)} className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded">
+          Create Category
+        </button>
+
+        {
+          categoryModal && <CategoryModal closeModal={closeModal} />
+        }
       </div>
+
+      <CardBody className="overflow-x-scroll px-0 pt-0 pb-2">
+        <table className="w-full min-w-[640px] table-auto">
+          <thead>
+            <tr>
+              {["author", "function", "status", "employed", ""].map((el) => (
+                <th
+                  key={el}
+                  className="border-b border-blue-gray-50 py-3 px-5 text-left"
+                >
+                  <Typography
+                    variant="small"
+                    className="text-[11px] font-bold uppercase text-blue-gray-400"
+                  >
+                    {el}
+                  </Typography>
+                </th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {authorsTableData.map(
+              ({ img, name, email, job, online, date }, key) => {
+                const className = `py-3 px-5 ${
+                  key === authorsTableData.length - 1
+                    ? ""
+                    : "border-b border-blue-gray-50"
+                }`;
+
+                return (
+                  <tr key={name}>
+                    <td className={className}>
+                      <div className="flex items-center gap-4">
+                        <Avatar src={img} alt={name} size="sm" variant="rounded" />
+                        <div>
+                          <Typography
+                            variant="small"
+                            color="blue-gray"
+                            className="font-semibold"
+                          >
+                            {name}
+                          </Typography>
+                          <Typography className="text-xs font-normal text-blue-gray-500">
+                            {email}
+                          </Typography>
+                        </div>
+                      </div>
+                    </td>
+                    <td className={className}>
+                      <Typography className="text-xs font-semibold text-blue-gray-600">
+                        {job[0]}
+                      </Typography>
+                      <Typography className="text-xs font-normal text-blue-gray-500">
+                        {job[1]}
+                      </Typography>
+                    </td>
+                    <td className={className}>
+                      <Chip
+                        variant="gradient"
+                        color={online ? "green" : "blue-gray"}
+                        value={online ? "online" : "offline"}
+                        className="py-0.5 px-2 text-[11px] font-medium w-fit"
+                      />
+                    </td>
+                    <td className={className}>
+                      <Typography className="text-xs font-semibold text-blue-gray-600">
+                        {date}
+                      </Typography>
+                    </td>
+                    <td className={className}>
+                      <Typography
+                        as="a"
+                        href="#"
+                        className="text-xs font-semibold text-blue-gray-600"
+                      >
+                        Edit
+                      </Typography>
+                    </td>
+                  </tr>
+                );
+              }
+            )}
+          </tbody>
+        </table>
+      </CardBody>
+
     </div>
   );
 }
