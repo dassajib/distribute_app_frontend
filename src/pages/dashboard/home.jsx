@@ -22,7 +22,7 @@ export function Home() {
   const [categories, setCategories] = useState([]);
   const [categoryModal, setcategoryModal] = useState(false);
 
-  const closeModal = () => setcategoryModal(false)
+  const closeModal = () => setcategoryModal(false);
 
   useEffect(() => {
     const fetchCategories = async () => {
